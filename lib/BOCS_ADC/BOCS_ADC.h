@@ -10,10 +10,16 @@
 #include <Arduino.h>
 #include <Adafruit_ADS1015.h>
 #include <BOCS_I2C.h>
+/****************************************************************************//*
+ * @brief  Configuration macros specifying details about BOCS ADCs.
+ *
+ * ADCS_PER_GROUP is the number of ADS1115 ADCs per group of sensors.
+ ******************************************************************************/
+#define ADCS_PER_GROUP 0x03
 /******************************************************************************/
 class ADCGroup {
   private:
-    static const uint8_t NUMBER_OF_ADCS = 0x03;
+    static const uint8_t NUMBER_OF_ADCS = ADCS_PER_GROUP;
     Adafruit_ADS1115 adcs[NUMBER_OF_ADCS];
   public:
     ADCGroup (void);
@@ -22,5 +28,9 @@ class ADCGroup {
     void adc_init_all(void);
     int16_t read_value(uint8_t);
     void read_values(int16_t*);
+    void print_value(uint8_t);
+    void print_values(void);
+    void set_gain(uint8_t, adsGain_t);
+    void set_gain_all(adsGain_t);
 };
 #endif

@@ -18,9 +18,9 @@
  * TCA9548A channels.
  ******************************************************************************/
 #define I2C_MUX_ADDR 0x70
-#define SENSOR_1_ADDR 0x4A
-#define SENSOR_2_ADDR 0x4B
-#define SENSOR_3_ADDR 0x48
+#define SENSOR_1_ADDR 0x48
+#define SENSOR_2_ADDR 0x49
+#define SENSOR_3_ADDR 0x4A
 /****************************************************************************//*
  * @brief  Configuration macros associating TCA9548A channel numbers with types
  *         of sensors attached.

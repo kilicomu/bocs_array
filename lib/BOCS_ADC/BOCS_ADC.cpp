@@ -38,3 +38,26 @@ void ADCGroup::read_values(int16_t *value_buffer) {
     value_buffer[i] = adcs[i].readADC_Differential_0_1();
   }
 }
+/******************************************************************************/
+void ADCGroup::print_value(uint8_t adc_number) {
+  Serial.print(read_value(adc_number));
+}
+/******************************************************************************/
+void ADCGroup::print_values(void) {
+  Serial.print(read_value(0));
+  Serial.print(",");
+  Serial.print(read_value(1));
+  Serial.print(",");
+  Serial.print(read_value(2));
+}
+/******************************************************************************/
+void ADCGroup::set_gain(uint8_t adc_number, adsGain_t gain) {
+  adcs[adc_number].setGain(gain);
+}
+/******************************************************************************/
+void ADCGroup::set_gain_all(adsGain_t gain) {
+  for (uint8_t i = 0; i < NUMBER_OF_ADCS; ++i) {
+    adcs[i].setGain(gain);
+  }
+}
+
