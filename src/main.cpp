@@ -8,39 +8,43 @@
 #include <BOCS_ADC.h>
 #include <BOCS_I2C.h>
 /******************************************************************************/
-ADCGroup adcs;
-int16_t adc_values[3];
+ADCGroup electrochem_adcs;
+ADCGroup co2_adcs;
+int16_t adc_value_buffer[ADC_VALUE_BUFFER_LENGTH];
 /***************************************************************************//**
  * @brief  Code that will run before the main execution loop.
  ******************************************************************************/
 void setup() {
   Serial.begin(9600);
   while (!Serial) {}
-  Serial.println("INFO: SERIAL INITIALISED");
+  Serial.println("INFO: INITIALISED USB SERIAL");
 
   i2c_init_bus();
-  Serial.println("INFO: JOINED I2C BUS AS MASTER");
+  Serial.println("INFO: INITIALISED I2C BUS; JOINED AS MASTER");
 
-  adcs.adc_init_all();
-  Serial.println("INFO: INITIALISED ADCS");
+  electrochem_adcs.init_all();
+  Serial.println("INFO: INITIALISED ELECTROCHEM ADCS");
+
+  co2_adcs.init_all();
+  Serial.println("INFO: INITIALISED CO2_ADCS");
 }
 /***************************************************************************//**
  * @brief  The main execution loop.
  ******************************************************************************/
 void loop() {
+  Serial.println("INFO: READING NO SENSORS");
   i2c_select_channel(NO_SENSORS);
-  adcs.read_values(adc_values);
-  Serial.print(adc_values[0]);
-  Serial.print(",");
-  Serial.print(adc_values[1]);
-  Serial.print(",");
-  Serial.println(adc_values[2]);
+  electrochem_adcs.read_values(adc_value_buffer);
+  for (uint8_t i = 0; i < ADC_VALUE_BUFFER_LENGTH; ++i) {
+    Serial.println(adc_value_buffer[i]);
+  }
+
+  Serial.println("INFO: READING NO2_SENSORS");
   i2c_select_channel(NO2_SENSORS);
-  adcs.read_values(adc_values);
-  Serial.print(adc_values[0]);
-  Serial.print(",");
-  Serial.print(adc_values[1]);
-  Serial.print(",");
-  Serial.println(adc_values[2]);
+  electrochem_adcs.read_values(adc_value_buffer);
+  for (uint8_t i = 0; i < ADC_VALUE_BUFFER_LENGTH; ++i) {
+    Serial.println(adc_value_buffer[i]);
+  }
+
   delay(1000);
 }

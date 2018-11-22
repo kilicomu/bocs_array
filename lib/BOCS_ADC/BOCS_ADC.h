@@ -14,22 +14,23 @@
  * @brief  Configuration macros specifying details about BOCS ADCs.
  *
  * ADCS_PER_GROUP is the number of ADS1115 ADCs per group of sensors.
+ *
+ * ADC_VALUE_BUFFER_LENGTH is the number of uint16_t needed to capture all ADC
+ * values in a group (two differential per ADC).
  ******************************************************************************/
 #define ADCS_PER_GROUP 0x03
+#define ADC_VALUE_BUFFER_LENGTH (2 * ADCS_PER_GROUP)
 /******************************************************************************/
 class ADCGroup {
   private:
-    static const uint8_t NUMBER_OF_ADCS = ADCS_PER_GROUP;
-    Adafruit_ADS1115 adcs[NUMBER_OF_ADCS];
+    Adafruit_ADS1115 adcs[ADCS_PER_GROUP];
   public:
     ADCGroup (void);
     ADCGroup (uint8_t, uint8_t, uint8_t);
-    void adc_init(uint8_t);
-    void adc_init_all(void);
-    int16_t read_value(uint8_t);
+    void init(uint8_t);
+    void init_all(void);
+    void read_value(uint8_t, int16_t*);
     void read_values(int16_t*);
-    void print_value(uint8_t);
-    void print_values(void);
     void set_gain(uint8_t, adsGain_t);
     void set_gain_all(adsGain_t);
 };

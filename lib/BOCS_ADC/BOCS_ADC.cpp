@@ -18,37 +18,27 @@ ADCGroup::ADCGroup(uint8_t addr_1, uint8_t addr_2, uint8_t addr_3) {
   adcs[2] = Adafruit_ADS1115(addr_3);
 }
 /******************************************************************************/
-void ADCGroup::adc_init(uint8_t adc_number) {
+void ADCGroup::init(uint8_t adc_number) {
   adcs[adc_number].begin();
 }
 /******************************************************************************/
-void ADCGroup::adc_init_all(void) {
-  for (uint8_t i = 0; i < NUMBER_OF_ADCS; ++i) {
-    adcs[i].begin();
+void ADCGroup::init_all(void) {
+  for (uint8_t i = 0; i < ADCS_PER_GROUP; ++i) {
+    init(i);
   }
 }
 /******************************************************************************/
-int16_t ADCGroup::read_value(uint8_t adc_number) {
-  return adcs[adc_number].readADC_Differential_0_1();
+void ADCGroup::read_value(uint8_t adc_number, int16_t *value_buffer) {
+  value_buffer[0] = adcs[adc_number].readADC_Differential_0_1();
+  value_buffer[1] = adcs[adc_number].readADC_Differential_2_3();
 }
 
 /******************************************************************************/
 void ADCGroup::read_values(int16_t *value_buffer) {
-  for (uint8_t i = 0; i < NUMBER_OF_ADCS; ++i) {
-    value_buffer[i] = adcs[i].readADC_Differential_0_1();
+  for (uint8_t i = 0; i < ADCS_PER_GROUP; ++i) {
+    value_buffer[(2 * i)] = adcs[i].readADC_Differential_0_1();
+    value_buffer[((2 * i) + 1)] = adcs[i].readADC_Differential_2_3();
   }
-}
-/******************************************************************************/
-void ADCGroup::print_value(uint8_t adc_number) {
-  Serial.print(read_value(adc_number));
-}
-/******************************************************************************/
-void ADCGroup::print_values(void) {
-  Serial.print(read_value(0));
-  Serial.print(",");
-  Serial.print(read_value(1));
-  Serial.print(",");
-  Serial.print(read_value(2));
 }
 /******************************************************************************/
 void ADCGroup::set_gain(uint8_t adc_number, adsGain_t gain) {
@@ -56,8 +46,8 @@ void ADCGroup::set_gain(uint8_t adc_number, adsGain_t gain) {
 }
 /******************************************************************************/
 void ADCGroup::set_gain_all(adsGain_t gain) {
-  for (uint8_t i = 0; i < NUMBER_OF_ADCS; ++i) {
-    adcs[i].setGain(gain);
+  for (uint8_t i = 0; i < ADCS_PER_GROUP; ++i) {
+    set_gain(i, gain);
   }
 }
 
