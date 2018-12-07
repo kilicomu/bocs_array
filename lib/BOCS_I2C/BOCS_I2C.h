@@ -21,14 +21,16 @@
 #define SENSOR_1_ADDR 0x48
 #define SENSOR_2_ADDR 0x49
 #define SENSOR_3_ADDR 0x4A
+#define SENSOR_4_ADDR 0x4B
 /****************************************************************************//*
  * @brief  Configuration macros associating TCA9548A channel numbers with types
  *         of sensors attached.
  ******************************************************************************/
+#define MOS_SENSORS 0x00
 #define NO_SENSORS 0x01
-#define NO2_SENSORS 0x02
+#define CO_SENSORS 0x02
 #define OX_SENSORS 0x03
-#define CO_SENSORS 0x04
+#define NO2_SENSORS 0x04
 #define CO2_SENSORS 0x05
 /****************************************************************************//*
  * @brief  Initialise I2C bus, joining as master.

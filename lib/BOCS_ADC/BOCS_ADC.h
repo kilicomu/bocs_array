@@ -23,10 +23,11 @@
 /******************************************************************************/
 class ADCGroup {
   private:
-    Adafruit_ADS1115 adcs[ADCS_PER_GROUP];
+    uint8_t number_of_adcs;
+    uint8_t adc_buffer_length;
+    Adafruit_ADS1115 *adcs;
   public:
-    ADCGroup (void);
-    ADCGroup (uint8_t, uint8_t, uint8_t);
+    ADCGroup (uint8_t);
     void init(uint8_t);
     void init_all(void);
     void read_value(uint8_t, int16_t*);
