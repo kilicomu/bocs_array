@@ -15,7 +15,7 @@
  *
  * DATA_FILE_NAME is the name of the data file that will be logged to.
  ******************************************************************************/
-#define DATA_FILE_NAME "BOCS.txt"
+#define DATA_FILE_NAME "INDOOR.TXT"
 /****************************************************************************//*
  * @brief  Initialise Velleman data logging shield SD card capabilities.
  ******************************************************************************/

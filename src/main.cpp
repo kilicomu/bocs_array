@@ -11,11 +11,21 @@
 #include <BOCS_SD.h>
 #include <BOCS_Serial.h>
 /******************************************************************************/
+#define CO2_BUFFER_SIZE 6
+#define ELECTROCHEM_BUFFER_SIZE 6
+#define MOS_BUFFER_SIZE 8
+/******************************************************************************/
 ADCGroup ELECTROCHEM_ADCS(3);
 ADCGroup CO2_ADCS(3);
 ADCGroup MOS_ADCS(4);
 
 RTC_DS1307 rtc;
+
+int16_t CO2_BUFFER[CO2_BUFFER_SIZE];
+int16_t ELECTROCHEM_BUFFER[ELECTROCHEM_BUFFER_SIZE];
+int16_t MOS_BUFFER[MOS_BUFFER_SIZE];
+
+File data_file;
 /***************************************************************************//**
  * @brief  Code that will run before the main execution loop.
  ******************************************************************************/
@@ -51,10 +61,76 @@ void setup() {
   i2c_select_channel(CO2_SENSORS);
   CO2_ADCS.init_all();
   Serial.println("INFO: INITIALISED CO2 ADCS");
+
+  i2c_select_channel(MOS_SENSORS);
+  Serial.println("INFO: RESET I2C MULTIPLEXER, READY FOR SAMPLING");
 }
 /***************************************************************************//**
  * @brief  The main execution loop.
  ******************************************************************************/
 void loop() {
+  uint32_t timestamp = rtc_get_unix_time(rtc);
 
+  data_file = SD.open(DATA_FILE_NAME, FILE_WRITE);
+  if (data_file) {
+    data_file.print(timestamp);
+    data_file.print(',');
+    data_file.close();
+  } else {
+    Serial.println("ERROR: UNABLE TO WRITE TIMESTAMP TO SD CARD DATA FILE");
+  }
+ 
+  Serial.print(timestamp);
+  Serial.print(',');
+
+  // READ, WRITE, AND PRINT MOS DATA:
+  i2c_select_channel(MOS_SENSORS);
+  Serial.println("INFO: SELECTED MOS SENSORS");
+  MOS_ADCS.read_values(MOS_BUFFER);
+  Serial.println("INFO: READ MOS DATA INTO BUFFER");
+  data_file = SD.open(DATA_FILE_NAME, FILE_WRITE);
+  if (data_file) {
+    sd_write_adc_group_data(data_file, MOS_BUFFER, MOS_BUFFER_SIZE);
+    data_file.print("\r\n");
+    data_file.close();
+    Serial.println("INFO: WROTE MOS DATA TO FILE");
+  } else {
+    Serial.println("ERROR: UNABLE TO OPEN SD DATA FILE FOR WRITING");
+  }
+  serial_write_adc_group_data(MOS_BUFFER, MOS_BUFFER_SIZE);
+  Serial.print("\r\n");
+
+  // READ, WRITE, AND PRINT ELECTROCHEM DATA:
+//  for (uint8_t i = NO_SENSORS; i < CO2_SENSORS; ++i) {
+//    i2c_select_channel(i);
+//    Serial.println("INFO: SELECTED ELECTROCHEM ADC GROUP");
+//    ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
+//    Serial.println("INFO: READ ELECTROCHEM DATA INTO BUFFER");
+//    data_file = SD.open(DATA_FILE_NAME, FILE_WRITE);
+//    if (data_file) {
+//      sd_write_adc_group_data(data_file, ELECTROCHEM_BUFFER,
+//                              ELECTROCHEM_BUFFER_SIZE);
+//      data_file.close();
+//      Serial.println("INFO: WROTE ELECTROCHEM DATA TO FILE");
+//    } else {
+//      Serial.println("ERROR: UNABLE TO OPEN SD DATA FILE FOR WRITING");
+//    }
+//    serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
+//  }
+//
+//  // READ, WRITE, AND PRINT CO2 DATA:
+//  i2c_select_channel(CO2_SENSORS);
+//  CO2_ADCS.read_values(CO2_BUFFER);
+//  data_file = SD.open(DATA_FILE_NAME, FILE_WRITE);
+//  if (data_file) {
+//    sd_write_adc_group_data(data_file, CO2_BUFFER, CO2_BUFFER_SIZE);
+//    data_file.print("\r\n");
+//    data_file.close();
+//  } else {
+//    Serial.println("ERROR: UNABLE TO OPEN SD DATA FILE FOR WRITING");
+//  }
+//  serial_write_adc_group_data(CO2_BUFFER, CO2_BUFFER_SIZE);
+//  Serial.print("\r\n");
+
+  delay(1000);
 }
