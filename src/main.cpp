@@ -33,7 +33,7 @@ void setup() {
   rtc_init(rtc);
   i2c_select_channel(MOS_SENSORS);
   MOS_ADCS.init_all();
-  for (uint8_t i = NO_SENSORS; i < NO2_SENSORS; ++i) {
+  for (uint8_t i = NO_SENSORS; i < CO2_SENSORS; ++i) {
     i2c_select_channel(i);
     ELECTROCHEM_ADCS.init_all();
   }
@@ -65,6 +65,11 @@ void loop() {
   Serial.print(',');
 
   i2c_select_channel(OX_SENSORS);
+  ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
+  serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
+  Serial.print(',');
+
+  i2c_select_channel(NO2_SENSORS);
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
   Serial.print(',');
