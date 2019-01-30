@@ -32,6 +32,8 @@ class ADCGroup {
     void init_all(void);
     void read_value(uint8_t, int16_t*);
     void read_values(int16_t*);
+    void read_value_nd(uint8_t, int16_t*);
+    void read_values_nd(int16_t*);
     void set_gain(uint8_t, adsGain_t);
     void set_gain_all(adsGain_t);
 };

@@ -10,11 +10,10 @@ ADCGroup::ADCGroup(uint8_t count) {
   number_of_adcs = count;
   adc_buffer_length = 2 * count;
   adcs = (Adafruit_ADS1115 *) malloc(sizeof(Adafruit_ADS1115) * number_of_adcs);
-
-  adcs[0] = Adafruit_ADS1115(SENSOR_1_ADDR);
-  adcs[1] = Adafruit_ADS1115(SENSOR_2_ADDR);
-  adcs[2] = Adafruit_ADS1115(SENSOR_3_ADDR);
-  adcs[3] = Adafruit_ADS1115(SENSOR_4_ADDR);
+  
+  for (uint8_t i; i < count; ++i) {
+    adcs[i] = Adafruit_ADS1115((i + 0x48));
+  }
 }
 /******************************************************************************/
 void ADCGroup::init(uint8_t adc_number) {
@@ -41,6 +40,20 @@ void ADCGroup::read_values(int16_t *value_buffer) {
   for (uint8_t i = 0; i < number_of_adcs; ++i) {
     value_buffer[(2 * i)] = adcs[i].readADC_Differential_0_1();
     value_buffer[((2 * i) + 1)] = adcs[i].readADC_Differential_2_3();
+  }
+}
+/******************************************************************************/
+void ADCGroup::read_value_nd(uint8_t adc_number, int16_t *value_buffer) {
+  if (adc_number >= 0 && adc_number < number_of_adcs) {
+    value_buffer[0] = adcs[adc_number].readADC_SingleEnded(0);
+    value_buffer[1] = adcs[adc_number].readADC_SingleEnded(1);
+  }
+}
+/******************************************************************************/
+void ADCGroup::read_values_nd(int16_t *value_buffer) {
+  for (uint8_t i = 0; i < number_of_adcs; ++i) {
+    value_buffer[(2 * i)] = adcs[i].readADC_SingleEnded(0);
+    value_buffer[((2 * i) + 1)] = adcs[i].readADC_SingleEnded(1);
   }
 }
 /******************************************************************************/

@@ -32,6 +32,7 @@
 #define OX_SENSORS 0x03
 #define NO2_SENSORS 0x04
 #define CO2_SENSORS 0x05
+#define META_SENSORS 0x07
 /****************************************************************************//*
  * @brief  Initialise I2C bus, joining as master.
  ******************************************************************************/

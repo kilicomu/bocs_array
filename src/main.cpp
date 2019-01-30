@@ -13,17 +13,20 @@
 /******************************************************************************/
 #define CO2_BUFFER_SIZE 6
 #define ELECTROCHEM_BUFFER_SIZE 6
+#define META_BUFFER_SIZE 4
 #define MOS_BUFFER_SIZE 8
 /******************************************************************************/
 ADCGroup ELECTROCHEM_ADCS(3);
 ADCGroup CO2_ADCS(3);
 ADCGroup MOS_ADCS(4);
+ADCGroup META_ADCS(2);
 
 RTC_DS1307 rtc;
 
 int16_t CO2_BUFFER[CO2_BUFFER_SIZE];
 int16_t ELECTROCHEM_BUFFER[ELECTROCHEM_BUFFER_SIZE];
 int16_t MOS_BUFFER[MOS_BUFFER_SIZE];
+int16_t META_BUFFER[META_BUFFER_SIZE];
 /***************************************************************************//**
  * @brief  Code that will run before the main execution loop.
  ******************************************************************************/
@@ -39,6 +42,8 @@ void setup() {
   }
   i2c_select_channel(CO2_SENSORS);
   CO2_ADCS.init_all();
+  i2c_select_channel(META_SENSORS);
+  META_ADCS.init_all();
   i2c_select_channel(MOS_SENSORS);
 }
 /***************************************************************************//**
@@ -77,7 +82,10 @@ void loop() {
   i2c_select_channel(CO2_SENSORS);
   CO2_ADCS.read_values(CO2_BUFFER);
   serial_write_adc_group_data(CO2_BUFFER, CO2_BUFFER_SIZE);
-  Serial.print("\r\n");
+
+  i2c_select_channel(META_SENSORS);
+  META_ADCS.read_values_nd(META_BUFFER);
+  serial_write_adc_group_data(META_BUFFER, META_BUFFER_SIZE);
   
   delay(1000);
 }
