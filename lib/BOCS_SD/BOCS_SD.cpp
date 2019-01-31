@@ -8,7 +8,7 @@
 /******************************************************************************/
 void sd_init(void) {
   if (!SD.begin()) {
-    Serial.println("ERROR: UNABLE TO INITIALISE SD CARD CAPABILITY");
+    Serial.println(F("ERROR: UNABLE TO INITIALISE SD CARD CAPABILITY"));
     while(1);
   }
 }

@@ -9,7 +9,7 @@
 /******************************************************************************/
 void rtc_init(RTC_DS1307 rtc) {
   if (! rtc.begin()) {
-    Serial.println("ERROR: COULDN'T FIND RTC!");
+    Serial.println(F("ERROR: COULDN'T FIND RTC!"));
     while(1);
   }
 }

@@ -52,32 +52,32 @@ void setup() {
 void loop() {
   uint32_t timestamp = rtc_get_unix_time(rtc);
   Serial.print(timestamp);
-  Serial.print(',');
+  Serial.print(F(","));
   
   i2c_select_channel(MOS_SENSORS);
   MOS_ADCS.read_values(MOS_BUFFER);
   serial_write_adc_group_data(MOS_BUFFER, MOS_BUFFER_SIZE);
-  Serial.print(',');
+  Serial.print(F(","));
  
   i2c_select_channel(NO_SENSORS);
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
-  Serial.print(',');
+  Serial.print(F(","));
   
   i2c_select_channel(CO_SENSORS);
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
-  Serial.print(',');
+  Serial.print(F(","));
 
   i2c_select_channel(OX_SENSORS);
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
-  Serial.print(',');
+  Serial.print(F(","));
 
   i2c_select_channel(NO2_SENSORS);
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
-  Serial.print(',');
+  Serial.print(F(","));
   
   i2c_select_channel(CO2_SENSORS);
   CO2_ADCS.read_values(CO2_BUFFER);
@@ -86,6 +86,8 @@ void loop() {
   i2c_select_channel(META_SENSORS);
   META_ADCS.read_values_nd(META_BUFFER);
   serial_write_adc_group_data(META_BUFFER, META_BUFFER_SIZE);
+
+  Serial.print(F("\r\n"));
   
   delay(1000);
 }
