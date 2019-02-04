@@ -9,6 +9,7 @@
 /******************************************************************************/
 #include <Arduino.h>
 #include <Wire.h>
+#include <Adafruit_INA219.h>
 /****************************************************************************//*
  * @brief  Configuration macros specifying I2C addresses of slave devices.
  *
@@ -43,4 +44,13 @@ void i2c_init_bus(void);
  * @param[in]  channel  The channel to select, in range 0-8.
  ******************************************************************************/
 uint8_t i2c_select_channel(uint8_t channel);
+/****************************************************************************//*
+ * @brief  Get load voltage, current, and power from TCA channel.
+ *
+ * @param[in]     sensor        The INA219 object to get voltages and currents
+ *                              from.
+ * @param[inout]  value_buffer  Buffer in which to store voltage and current
+ *                              values.
+ ******************************************************************************/
+void i2c_read_channel_power(Adafruit_INA219 sensor, float *value_buffer);
 #endif
