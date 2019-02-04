@@ -52,6 +52,9 @@ void setup() {
   POWER_SENSOR.begin();
   CO2_ADCS.init_all();
 
+  i2c_select_channel(PUMP_SENSORS);
+  POWER_SENSOR.begin();
+
   i2c_select_channel(META_SENSORS);
   META_ADCS.init_all();
   i2c_select_channel(MOS_SENSORS);
@@ -66,48 +69,60 @@ void loop() {
   
   i2c_select_channel(MOS_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_adc_group_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
   MOS_ADCS.read_values(MOS_BUFFER);
   serial_write_adc_group_data(MOS_BUFFER, MOS_BUFFER_SIZE);
   Serial.print(F(","));
  
   i2c_select_channel(NO_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_adc_group_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
   Serial.print(F(","));
   
   i2c_select_channel(CO_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_adc_group_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
   Serial.print(F(","));
 
   i2c_select_channel(OX_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_adc_group_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
   Serial.print(F(","));
 
   i2c_select_channel(NO2_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_adc_group_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
   ELECTROCHEM_ADCS.read_values(ELECTROCHEM_BUFFER);
   serial_write_adc_group_data(ELECTROCHEM_BUFFER, ELECTROCHEM_BUFFER_SIZE);
   Serial.print(F(","));
   
   i2c_select_channel(CO2_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_adc_group_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
   CO2_ADCS.read_values(CO2_BUFFER);
   serial_write_adc_group_data(CO2_BUFFER, CO2_BUFFER_SIZE);
+
+  i2c_select_channel(PUMP_SENSORS);
+  i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
+  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+  Serial.print(F(","));
 
   i2c_select_channel(META_SENSORS);
   META_ADCS.read_values_nd(META_BUFFER);
   serial_write_adc_group_data(META_BUFFER, META_BUFFER_SIZE);
-  
+
+  delay(500);
   Serial.print(F("\r\n"));
 }

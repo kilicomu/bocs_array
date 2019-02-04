@@ -17,8 +17,9 @@ uint8_t i2c_select_channel(uint8_t channel) {
 }
 /******************************************************************************/
 void i2c_read_channel_power(Adafruit_INA219 sensor, float *value_buffer) {
-  float shunt_voltage_V = (sensor.getShuntVoltage_mV() / 1000);
-  value_buffer[0] = ((shunt_voltage_V + sensor.getBusVoltage_V()) * 1000);
+  float load_voltage_mV = ((sensor.getBusVoltage_V() * 1000) + 
+                           sensor.getShuntVoltage_mV());
+  value_buffer[0] = load_voltage_mV;
   value_buffer[1] = sensor.getCurrent_mA();
   value_buffer[2] = sensor.getPower_mW();
 }
