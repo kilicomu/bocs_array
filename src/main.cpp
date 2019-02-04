@@ -86,8 +86,6 @@ void loop() {
   i2c_select_channel(META_SENSORS);
   META_ADCS.read_values_nd(META_BUFFER);
   serial_write_adc_group_data(META_BUFFER, META_BUFFER_SIZE);
-
-  Serial.print(F("\r\n"));
   
-  delay(1000);
+  Serial.print(F("\r\n"));
 }

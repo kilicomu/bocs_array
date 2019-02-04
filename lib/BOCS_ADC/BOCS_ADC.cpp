@@ -11,7 +11,7 @@ ADCGroup::ADCGroup(uint8_t count) {
   adc_buffer_length = 2 * count;
   adcs = (Adafruit_ADS1115 *) malloc(sizeof(Adafruit_ADS1115) * number_of_adcs);
   
-  for (uint8_t i; i < count; ++i) {
+  for (uint8_t i = 0; i < count; ++i) {
     adcs[i] = Adafruit_ADS1115((i + 0x48));
   }
 }
