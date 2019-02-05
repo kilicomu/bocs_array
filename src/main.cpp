@@ -113,6 +113,7 @@ void loop() {
   Serial.print(F(","));
   CO2_ADCS.read_values(CO2_BUFFER);
   serial_write_adc_group_data(CO2_BUFFER, CO2_BUFFER_SIZE);
+  Serial.print(F(","));
 
   i2c_select_channel(PUMP_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
