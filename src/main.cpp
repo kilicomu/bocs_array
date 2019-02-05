@@ -31,7 +31,7 @@ int16_t MOS_BUFFER[MOS_BUFFER_SIZE];
 int16_t META_BUFFER[META_BUFFER_SIZE];
 float POWER_BUFFER[POWER_BUFFER_SIZE];
 
-char FILENAME[14] = {'\0'};
+char FILENAME[12] = {'\0'};
 File DATA_FILE;
 /***************************************************************************//**
  * @brief  Code that will run before the main execution loop.
@@ -69,12 +69,17 @@ void setup() {
 void loop() {
   DateTime now = rtc.now();
 
+  sprintf(FILENAME, "%04d%02d%02d.CSV", now.year(), now.month(), now.day());
+  DATA_FILE = SD.open(FILENAME, FILE_WRITE);
+  if (! DATA_FILE) {
+    Serial.println("ERROR: UNABLE TO OPEN SD CARD FILE");
+  }
+
   uint32_t timestamp = now.unixtime();
   Serial.print(timestamp);
   Serial.print(F(","));
-
-  sprintf(FILENAME, "%04d_%02d_%02d.csv", now.year(), now.month(), now.day());
-  DATA_FILE = SD.open(FILENAME, FILE_WRITE);
+  DATA_FILE.print(timestamp);
+  DATA_FILE.print(",");
   
   i2c_select_channel(MOS_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);

@@ -14,7 +14,7 @@
  *
  * BAUD_RATE is the desired baud rate for USB serial communication.
  ******************************************************************************/
-#define BAUD_RATE 9600
+#define BAUD_RATE 115200
 /****************************************************************************//*
  * @brief  Initialise the USB Serial interface.
  *
