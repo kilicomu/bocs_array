@@ -17,12 +17,4 @@
  * @param[inout]  rtc  The DS1307 instance to initialise.
  ******************************************************************************/
 void rtc_init(RTC_DS1307 rtc);
-/****************************************************************************//*
- * @brief  Return the current UNIX timestamp.
- *
- * @param[in]  rtc  DS1307 instance from which we will get a timestamp.
- *
- * @return          UNIX timestamp.
- ******************************************************************************/
-uint32_t rtc_get_unix_time(RTC_DS1307 rtc);
 #endif

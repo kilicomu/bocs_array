@@ -9,6 +9,7 @@
 ADCGroup::ADCGroup(uint8_t count) {
   number_of_adcs = count;
   adc_buffer_length = 2 * count;
+  adc_buffer = (int16_t *) malloc(sizeof(int16_t) * adc_buffer_length);
   adcs = (Adafruit_ADS1115 *) malloc(sizeof(Adafruit_ADS1115) * number_of_adcs);
   
   for (uint8_t i = 0; i < count; ++i) {
@@ -28,32 +29,17 @@ void ADCGroup::init_all(void) {
   }
 }
 /******************************************************************************/
-void ADCGroup::read_value(uint8_t adc_number, int16_t *value_buffer) {
-  if (adc_number >=0 && adc_number < number_of_adcs) {
-    value_buffer[0] = adcs[adc_number].readADC_Differential_0_1();
-    value_buffer[1] = adcs[adc_number].readADC_Differential_2_3();
-  }
-}
-
-/******************************************************************************/
-void ADCGroup::read_values(int16_t *value_buffer) {
+void ADCGroup::read_values(void) {
   for (uint8_t i = 0; i < number_of_adcs; ++i) {
-    value_buffer[(2 * i)] = adcs[i].readADC_Differential_0_1();
-    value_buffer[((2 * i) + 1)] = adcs[i].readADC_Differential_2_3();
+    adc_buffer[(2 * i)] = adcs[i].readADC_Differential_0_1();
+    adc_buffer[((2 * i) + 1)] = adcs[i].readADC_Differential_2_3();
   }
 }
 /******************************************************************************/
-void ADCGroup::read_value_nd(uint8_t adc_number, int16_t *value_buffer) {
-  if (adc_number >= 0 && adc_number < number_of_adcs) {
-    value_buffer[0] = adcs[adc_number].readADC_SingleEnded(0);
-    value_buffer[1] = adcs[adc_number].readADC_SingleEnded(1);
-  }
-}
-/******************************************************************************/
-void ADCGroup::read_values_nd(int16_t *value_buffer) {
+void ADCGroup::read_values_nd(void) {
   for (uint8_t i = 0; i < number_of_adcs; ++i) {
-    value_buffer[(2 * i)] = adcs[i].readADC_SingleEnded(0);
-    value_buffer[((2 * i) + 1)] = adcs[i].readADC_SingleEnded(1);
+    adc_buffer[(2 * i)] = adcs[i].readADC_SingleEnded(0);
+    adc_buffer[((2 * i) + 1)] = adcs[i].readADC_SingleEnded(1);
   }
 }
 /******************************************************************************/
@@ -67,4 +53,22 @@ void ADCGroup::set_gain_all(adsGain_t gain) {
   for (uint8_t i = 0; i < number_of_adcs; ++i) {
     set_gain(i, gain);
   }
+}
+/******************************************************************************/
+void ADCGroup::write_values_to_serial(void) {
+  uint8_t i = 0;
+  for (i = 0; i < (adc_buffer_length - 1); ++i) {
+    Serial.print(adc_buffer[i]);
+    Serial.print(F(","));
+  }
+  Serial.print(adc_buffer[i]);
+}
+/******************************************************************************/
+void ADCGroup::write_values_to_sd(File file) {
+  uint8_t i = 0;
+  for (i = 0; i < (adc_buffer_length - 1); ++i) {
+    file.print(adc_buffer[i]);
+    file.print(F(","));
+  }
+  file.print(adc_buffer[i]);
 }

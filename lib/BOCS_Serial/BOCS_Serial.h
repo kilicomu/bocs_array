@@ -22,17 +22,11 @@
  ******************************************************************************/
 void serial_init(uint32_t rate);
 /****************************************************************************//*
- * @brief  Write a buffer of ADC group data to the USB serial interface.
- *
- * @param[in]  data      The ADC data.
- * @param[in]  data_len  The length of the ADC data buffer.
- ******************************************************************************/
-void serial_write_adc_group_data(int16_t *data, uint8_t data_len);
-/****************************************************************************//*
  * @brief  Write a buffer of power data to the USB serial interface.
  *
  * @param[in]  data      The power data.
  * @param[in]  data_len  The length of the power data buffer.
  ******************************************************************************/
+// TODO: CONSIDER REFACTORING THIS TO BE A METHOD OF ADCGroup
 void serial_write_power_data(float *data, uint8_t data_len);
 #endif

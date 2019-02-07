@@ -13,15 +13,6 @@ void sd_init(void) {
   }
 }
 /******************************************************************************/
-void sd_write_adc_group_data(File file, int16_t *data, uint8_t data_len) {
-  uint8_t i;
-  for (i = 0; i < (data_len - 1); ++i) {
-    file.print(data[i]);
-    file.print(',');
-  }
-  file.print(data[i]);
-}
-/******************************************************************************/
 void sd_write_power_data(File file, float *data, uint8_t data_len) {
   uint8_t i;
   for (i = 0; i < (data_len - 1); ++i) {
