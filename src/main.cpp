@@ -19,6 +19,7 @@ ADCGroup MOS_ADCS(4);
 ADCGroup META_ADCS(2);
 
 Adafruit_INA219 POWER_SENSOR;
+Adafruit_INA219 POWER_SENSOR_2(0x41);
 RTC_DS1307 rtc;
 
 float POWER_BUFFER[POWER_BUFFER_SIZE];
@@ -44,10 +45,17 @@ void sample_adc_group(uint8_t adc_channel, ADCGroup adc_group,
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
   serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
   sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
-  
   Serial.print(F(","));
   data_file.print(F(","));
 
+  if (adc_channel == 0) {
+    i2c_read_channel_power(POWER_SENSOR_2, POWER_BUFFER);
+    serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
+    sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
+    Serial.print(F(","));
+    data_file.print(F(","));
+  }
+  
   adc_group.read_values();
   adc_group.write_values_to_serial();
   adc_group.write_values_to_sd(data_file);
@@ -68,6 +76,7 @@ void setup() {
 
   i2c_select_channel(MOS_SENSORS);
   POWER_SENSOR.begin();
+  POWER_SENSOR_2.begin();
   MOS_ADCS.init_all();
 
   for (uint8_t i = NO_SENSORS; i < CO2_SENSORS; ++i) {
