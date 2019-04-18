@@ -101,22 +101,22 @@ void setup() {
 void loop() {
   DateTime now = rtc.now();
 
-   GET CURRENT DAY AND PRINT INTO DATA FILE NAME, CONFIRMING THAT WE CAN OPEN
-   THE DATA FILE ON THE SD CARD:
+  // GET CURRENT DAY AND PRINT INTO DATA FILE NAME, CONFIRMING THAT WE CAN OPEN
+  // THE DATA FILE ON THE SD CARD:
   sprintf(FILENAME, "%04d%02d%02d.CSV", now.year(), now.month(), now.day());
   DATA_FILE = SD.open(FILENAME, FILE_WRITE);
   if (! DATA_FILE) {
     Serial.println("ERROR: UNABLE TO OPEN SD CARD FILE");
   }
   
-   PRINT UNIX TIMESTAMP AS FIRST FIELD OF DATA:
+  // PRINT UNIX TIMESTAMP AS FIRST FIELD OF DATA:
   uint32_t timestamp = now.unixtime();
   Serial.print(timestamp);
   Serial.print(F(","));
   DATA_FILE.print(timestamp);
   DATA_FILE.print(",");
  
-   SAMPLE DATA FROM POWER SENSORS & ADCS AND WRITE TO USB SERIAL/SD CARD:
+  // SAMPLE DATA FROM POWER SENSORS & ADCS AND WRITE TO USB SERIAL/SD CARD:
   sample_adc_group(MOS_SENSORS, MOS_ADCS, DATA_FILE, 1);
   sample_adc_group(NO_SENSORS, ELECTROCHEM_ADCS, DATA_FILE, 1); 
   sample_adc_group(CO_SENSORS, ELECTROCHEM_ADCS, DATA_FILE, 1);
@@ -133,12 +133,10 @@ void loop() {
   DATA_FILE.print(",");
 
   // SAMPLE META SENSORS AND WRITE TO USB SERIAL/SD CARD:
-  Serial.println(F("INFO: BEFORE U WRITE"));
   i2c_select_channel(META_SENSORS);
   META_ADCS.read_values_nd();
   META_ADCS.write_u_values_to_serial();
   META_ADCS.write_u_values_to_sd(DATA_FILE);
-  Serial.println(F("INFO: AFTER U WRITE"));
 
   // WRITE NEW LINE TO USB SERIAL/SD CARD:
   Serial.print(F("\r\n"));

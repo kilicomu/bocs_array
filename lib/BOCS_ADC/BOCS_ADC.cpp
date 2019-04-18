@@ -14,7 +14,7 @@ ADCGroup::ADCGroup(uint8_t count) {
     adc_buffer = (int16_t *) malloc(sizeof(int16_t) * adc_buffer_length);
   }
 
-  if (count < 2) {
+  if (count < 3) {
     adc_u_buffer = (uint16_t *) malloc(sizeof(uint16_t) * adc_buffer_length);
   }
 
