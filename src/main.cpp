@@ -99,18 +99,19 @@ void setup() {
  * @brief  The main execution loop.
  ******************************************************************************/
 void loop() {
-  DateTime now = rtc.now();
+  DateTime iter_start_dt = rtc.now();
 
   // GET CURRENT DAY AND PRINT INTO DATA FILE NAME, CONFIRMING THAT WE CAN OPEN
   // THE DATA FILE ON THE SD CARD:
-  sprintf(FILENAME, "%04d%02d%02d.CSV", now.year(), now.month(), now.day());
+  sprintf(FILENAME, "%04d%02d%02d.CSV", iter_start_dt.year(),
+          iter_start_dt.month(), iter_start_dt.day());
   DATA_FILE = SD.open(FILENAME, FILE_WRITE);
   if (! DATA_FILE) {
     Serial.println("ERROR: UNABLE TO OPEN SD CARD FILE");
   }
   
   // PRINT UNIX TIMESTAMP AS FIRST FIELD OF DATA:
-  uint32_t timestamp = now.unixtime();
+  uint32_t timestamp = iter_start_dt.unixtime();
   Serial.print(timestamp);
   Serial.print(F(","));
   DATA_FILE.print(timestamp);
@@ -145,5 +146,5 @@ void loop() {
   // FLUSH THE SD CARD WRITE BUFFER:
   DATA_FILE.close();
 
-  delay(500);
+  while((rtc.now() - iter_start_dt).totalseconds() < 2) {}
 }
