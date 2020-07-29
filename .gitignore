@@ -44,6 +44,7 @@ tags
 *.zip
 
 # logs and databases 
+log
 *.log
 *.sql
 *.sqlite
