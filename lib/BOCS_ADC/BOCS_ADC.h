@@ -17,6 +17,7 @@ class ADCGroup {
     uint8_t number_of_adcs;
     uint8_t adc_buffer_length;
     int16_t *adc_buffer;
+    uint16_t *adc_u_buffer;
     Adafruit_ADS1115 *adcs;
   public:
     ADCGroup (uint8_t);
@@ -27,6 +28,8 @@ class ADCGroup {
     void set_gain(uint8_t, adsGain_t);
     void set_gain_all(adsGain_t);
     void write_values_to_serial(void);
+    void write_u_values_to_serial(void);
     void write_values_to_sd(File);
+    void write_u_values_to_sd(File);
 };
 #endif
