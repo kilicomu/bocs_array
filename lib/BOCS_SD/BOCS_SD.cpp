@@ -6,10 +6,12 @@
  ******************************************************************************/
 #include "BOCS_SD.h"
 /******************************************************************************/
-void sd_init(void) {
+bool sd_init(void) {
   if (!SD.begin()) {
     Serial.println(F("ERROR: UNABLE TO INITIALISE SD CARD CAPABILITY"));
-    while(1);
+    return false;
+  } else {
+    return true;
   }
 }
 /******************************************************************************/

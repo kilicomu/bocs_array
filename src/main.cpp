@@ -26,6 +26,8 @@ float POWER_BUFFER[POWER_BUFFER_SIZE];
 
 char FILENAME[12] = {'\0'};
 File DATA_FILE;
+
+bool SD_INITIALISED = false;
 /*****************************************************************************
  * @brief  Sample a group of ADCs, write the recorded values to USB serial and
  *         SD.
@@ -44,25 +46,33 @@ void sample_adc_group(uint8_t adc_channel, ADCGroup adc_group,
 
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
   serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
-  sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
   Serial.print(F(","));
-  data_file.print(F(","));
+  if (SD_INITIALISED) {
+    sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
+    data_file.print(F(","));
+  }
 
   if (adc_channel == 0) {
     i2c_read_channel_power(POWER_SENSOR_2, POWER_BUFFER);
     serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
-    sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
     Serial.print(F(","));
-    data_file.print(F(","));
+    if (SD_INITIALISED) {
+      sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
+      data_file.print(F(","));
+    }
   }
   
   adc_group.read_values();
   adc_group.write_values_to_serial();
-  adc_group.write_values_to_sd(data_file);
+  if (SD_INITIALISED) {
+    adc_group.write_values_to_sd(data_file);
+  }
   
   if (trailing_comma) {
     Serial.print(F(","));
-    data_file.print(F(","));
+    if (SD_INITIALISED) {
+      data_file.print(F(","));
+    }
   }
 }
 /*****************************************************************************
@@ -72,7 +82,7 @@ void setup() {
   serial_init(BAUD_RATE);
   i2c_init_bus();
   rtc_init(rtc);
-  sd_init();
+  SD_INITIALISED = sd_init();
 
   i2c_select_channel(MOS_SENSORS);
   POWER_SENSOR.begin();
@@ -103,19 +113,23 @@ void loop() {
 
   // GET CURRENT DAY AND PRINT INTO DATA FILE NAME, CONFIRMING THAT WE CAN OPEN
   // THE DATA FILE ON THE SD CARD:
-  sprintf(FILENAME, "%04d%02d%02d.CSV", iter_start_dt.year(),
-          iter_start_dt.month(), iter_start_dt.day());
-  DATA_FILE = SD.open(FILENAME, FILE_WRITE);
-  if (! DATA_FILE) {
-    Serial.println("ERROR: UNABLE TO OPEN SD CARD FILE");
+  if (SD_INITIALISED) {
+    sprintf(FILENAME, "%04d%02d%02d.CSV", iter_start_dt.year(),
+            iter_start_dt.month(), iter_start_dt.day());
+    DATA_FILE = SD.open(FILENAME, FILE_WRITE);
+    if (! DATA_FILE) {
+      Serial.println("ERROR: UNABLE TO OPEN SD CARD FILE");
+    }
   }
   
   // PRINT UNIX TIMESTAMP AS FIRST FIELD OF DATA:
   uint32_t timestamp = iter_start_dt.unixtime();
   Serial.print(timestamp);
   Serial.print(F(","));
-  DATA_FILE.print(timestamp);
-  DATA_FILE.print(",");
+  if (SD_INITIALISED) {
+    DATA_FILE.print(timestamp);
+    DATA_FILE.print(",");
+  }
  
   // SAMPLE DATA FROM POWER SENSORS & ADCS AND WRITE TO USB SERIAL/SD CARD:
   sample_adc_group(MOS_SENSORS, MOS_ADCS, DATA_FILE, 1);
@@ -129,22 +143,30 @@ void loop() {
   i2c_select_channel(PUMP_SENSORS);
   i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
   serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
-  sd_write_power_data(DATA_FILE, POWER_BUFFER, POWER_BUFFER_SIZE);
   Serial.print(F(","));
-  DATA_FILE.print(",");
+  if (SD_INITIALISED) {
+    sd_write_power_data(DATA_FILE, POWER_BUFFER, POWER_BUFFER_SIZE);
+    DATA_FILE.print(",");
+  }
 
   // SAMPLE META SENSORS AND WRITE TO USB SERIAL/SD CARD:
   i2c_select_channel(META_SENSORS);
   META_ADCS.read_values_nd();
   META_ADCS.write_u_values_to_serial();
-  META_ADCS.write_u_values_to_sd(DATA_FILE);
+  if (SD_INITIALISED) {
+    META_ADCS.write_u_values_to_sd(DATA_FILE);
+  }
 
   // WRITE NEW LINE TO USB SERIAL/SD CARD:
   Serial.print(F("\r\n"));
-  DATA_FILE.print("\r\n");
+  if (SD_INITIALISED) {
+    DATA_FILE.print("\r\n");
+  }
 
   // FLUSH THE SD CARD WRITE BUFFER:
-  DATA_FILE.close();
+  if (SD_INITIALISED) {
+    DATA_FILE.close();
+  }
 
   while((rtc.now() - iter_start_dt).totalseconds() < 2) {}
 }
