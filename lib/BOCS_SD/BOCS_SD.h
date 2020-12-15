@@ -11,9 +11,11 @@
 #include <SD.h>
 #include <SPI.h>
 /****************************************************************************//*
- * @brief  Initialise Velleman data logging shield SD card capabilities.
+ * @brief   Initialise Velleman data logging shield SD card capabilities.
+ * 
+ * @return  Boolean to indicate successful or failed SD card initialisation.
  ******************************************************************************/
-void sd_init(void);
+bool sd_init(void);
 /****************************************************************************//*
  * @brief Write a buffer of power sensor data to a file on the SD card.
  *
