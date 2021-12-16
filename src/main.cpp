@@ -12,7 +12,7 @@
 #include <SPI.h>
 #include <Wire.h>
 /******************************************************************************/
-#define BAUD_RATE 9600
+#define BAUD_RATE                  9600
 
 #define I2C_MUX_ADDRESS            0x70
 #define I2C_ADC_1_ADDRESS          0x48
@@ -22,19 +22,18 @@
 #define I2C_POWER_SENSOR_1_ADDRESS 0x40
 #define I2C_POWER_SENSOR_2_ADDRESS 0x41
 
-#define MUX_MOS_SENSOR_CHANNEL  0x00
-#define MUX_NO_SENSOR_CHANNEL   0x01
-#define MUX_CO_SENSOR_CHANNEL   0x02
-#define MUX_OX_SENSOR_CHANNEL   0x03
-#define MUX_NO2_SENSOR_CHANNEL  0x04
-#define MUX_CO2_SENSOR_CHANNEL  0x05
-#define MUX_PUMP_SENSOR_CHANNEL 0x06
-#define MUX_META_SENSOR_CHANNEL 0x07
+#define MUX_NO_SENSOR_CHANNEL      0x01
+#define MUX_CO_SENSOR_CHANNEL      0x02
+#define MUX_OX_SENSOR_CHANNEL      0x03
+#define MUX_NO2_SENSOR_CHANNEL     0x04
+#define MUX_CO2_SENSOR_CHANNEL     0x05
+#define MUX_PUMP_SENSOR_CHANNEL    0x06
+#define MUX_META_SENSOR_CHANNEL    0x07
 
-#define ADC_NUM_MOS_ADCS         0x04
-#define ADC_NUM_ELECTROCHEM_ADCS 0x03
-#define ADC_NUM_CO2_ADCS         0x03
-#define ADC_NUM_META_ADCS        0x02
+#define ADC_NUM_MOS_ADCS           0x04
+#define ADC_NUM_ELECTROCHEM_ADCS   0x03
+#define ADC_NUM_CO2_ADCS           0x03
+#define ADC_NUM_META_ADCS          0x02
 /******************************************************************************/
 void    i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count);
 void    i2c_read_power_sensor(Adafruit_INA219 power_sensor);
@@ -224,8 +223,6 @@ void i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count) {
       sd_data_file.print(F(","));
     }
   }
-  
-
 }
 
 void i2c_read_power_sensor(Adafruit_INA219 power_sensor) {
