@@ -69,6 +69,9 @@ void setup() {
 
   // ATTEMPT TO INITIALISE SD CARD:
   sd_initialised = SD.begin();
+  if (! sd_initialised) {
+    Serial.println(F("ERROR: COULDN'T INITIALISE SD!"));
+  }
 
   // INITIALISE MOS CHANNEL ADCS AND POWER SENSORS:
   mux_select_channel(MUX_MOS_SENSOR_CHANNEL);
