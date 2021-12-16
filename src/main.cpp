@@ -1,172 +1,157 @@
-/***************************************************************************//**
+/****************************************************************************//*
  * @file    main.cpp
  * @author  Killian Murphy <killian.murphy@york.ac.uk>
- * @date    21 November 2018
- * @brief   Read data from attached sensors and send over USB serial.
+ * @date    2021-12-16
+ * @brief   Main sensor reading loop for BOCS instrument.
  ******************************************************************************/
 #include <Arduino.h>
-#include <BOCS_ADC.h>
-#include <BOCS_I2C.h>
-#include <BOCS_RTC.h>
-#include <BOCS_SD.h>
-#include <BOCS_Serial.h>
+#include <Adafruit_ADS1015.h>
+#include <Adafruit_INA219.h>
+#include <RTClib.h>
+#include <SD.h>
+#include <SPI.h>
+#include <Wire.h>
 /******************************************************************************/
-#define POWER_BUFFER_SIZE 3
-/******************************************************************************/
-ADCGroup ELECTROCHEM_ADCS(3);
-ADCGroup CO2_ADCS(3);
-ADCGroup MOS_ADCS(4);
-ADCGroup META_ADCS(2);
+#define BAUD_RATE 115200
 
-Adafruit_INA219 POWER_SENSOR;
-Adafruit_INA219 POWER_SENSOR_2(0x41);
+#define I2C_MUX_ADDRESS      0x70
+#define I2C_SENSOR_1_ADDRESS 0x48
+#define I2C_SENSOR_2_ADDRESS 0x49
+#define I2C_SENSOR_3_ADDRESS 0x4A
+#define I2C_SENSOR_4_ADDRESS 0x4B
+
+#define MUX_MOS_SENSOR_CHANNEL  0x00
+#define MUX_NO_SENSOR_CHANNEL   0x01
+#define MUX_CO_SENSOR_CHANNEL   0x02
+#define MUX_OX_SENSOR_CHANNEL   0x03
+#define MUX_NO2_SENSOR_CHANNEL  0x04
+#define MUX_CO2_SENSOR_CHANNEL  0x05
+#define MUX_PUMP_SENSOR_CHANNEL 0x06
+#define MUX_META_SENSOR_CHANNEL 0x07
+
+#define ADC_NUM_MOS_ADCS         0x04
+#define ADC_NUM_ELECTROCHEM_ADCS 0x03
+#define ADC_NUM_CO2_ADCS         0x03
+#define ADC_NUM_META_ADCS        0x02
+/******************************************************************************/
+void    i2c_read_power_sensor(Adafruit_INA219 power_sensor, float *values);
+uint8_t mux_select_channel(uint8_t channel);
+/******************************************************************************/
+Adafruit_ADS1115 adcs[4] = {
+  Adafruit_ADS1115(I2C_SENSOR_1_ADDRESS),
+  Adafruit_ADS1115(I2C_SENSOR_2_ADDRESS),
+  Adafruit_ADS1115(I2C_SENSOR_3_ADDRESS),
+  Adafruit_ADS1115(I2C_SENSOR_4_ADDRESS)
+};
+Adafruit_INA219 power_sensor, power_sensor_2;
+File sd_data_file;
+char sd_filename[12] = {'\0'};
+float power_sensor_values[3];
 RTC_DS1307 rtc;
-
-float POWER_BUFFER[POWER_BUFFER_SIZE];
-
-char FILENAME[12] = {'\0'};
-File DATA_FILE;
-
-bool SD_INITIALISED = false;
-/*****************************************************************************
- * @brief  Sample a group of ADCs, write the recorded values to USB serial and
- *         SD.
- *
- * @param[in]     adc_channel     The TCA channel of the ADCs to be sampled.
- * @param[inout]  adc_group       The ADCGroup object corresponding to the ADCs
- *                                to be sampled.
- * @param[inout]  data_file       The SD data file to be written to.
- * @param[in]     trailing_comma  Whether or not to write a trailing comma to
- *                                output streams.
- * 
- ******************************************************************************/
-void sample_adc_group(uint8_t adc_channel, ADCGroup adc_group,
-                      File data_file, uint8_t trailing_comma) {
-  i2c_select_channel(adc_channel);
-
-  i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
-  Serial.print(F(","));
-  if (SD_INITIALISED) {
-    sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
-    data_file.print(F(","));
-  }
-
-  if (adc_channel == 0) {
-    i2c_read_channel_power(POWER_SENSOR_2, POWER_BUFFER);
-    serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
-    Serial.print(F(","));
-    if (SD_INITIALISED) {
-      sd_write_power_data(data_file, POWER_BUFFER, POWER_BUFFER_SIZE);
-      data_file.print(F(","));
-    }
-  }
-  
-  adc_group.read_values();
-  adc_group.write_values_to_serial();
-  if (SD_INITIALISED) {
-    adc_group.write_values_to_sd(data_file);
-  }
-  
-  if (trailing_comma) {
-    Serial.print(F(","));
-    if (SD_INITIALISED) {
-      data_file.print(F(","));
-    }
-  }
-}
-/*****************************************************************************
- * @brief  Code that will run before the main execution loop.
- ******************************************************************************/
+bool sd_initialised = false;
+/******************************************************************************/
 void setup() {
-  serial_init(BAUD_RATE);
-  i2c_init_bus();
-  rtc_init(rtc);
-  SD_INITIALISED = sd_init();
+  // INITIALISE USB SERIAL:
+  Serial.begin(BAUD_RATE);
+  while(!Serial) {}
 
-  i2c_select_channel(MOS_SENSORS);
-  POWER_SENSOR.begin();
-  POWER_SENSOR_2.begin();
-  MOS_ADCS.init_all();
+  // INITIALISE I2C BUS:
+  Wire.begin();
 
-  for (uint8_t i = NO_SENSORS; i < CO2_SENSORS; ++i) {
-    i2c_select_channel(i);
-    POWER_SENSOR.begin();
-    ELECTROCHEM_ADCS.init_all();
+  // INITIALISE RTC:
+  if (! rtc.begin()) {
+    Serial.println(F("ERROR: COULDN'T INITIALISE RTC!"));
+    while(1);
   }
 
-  i2c_select_channel(CO2_SENSORS);
-  POWER_SENSOR.begin();
-  CO2_ADCS.init_all();
+  // ATTEMPT TO INITIALISE SD CARD:
+  sd_initialised = SD.begin();
 
-  i2c_select_channel(PUMP_SENSORS);
-  POWER_SENSOR.begin();
+  // INITIALISE MOS CHANNEL ADCS AND POWER SENSORS:
+  mux_select_channel(MUX_MOS_SENSOR_CHANNEL);
+  power_sensor.begin();
+  power_sensor_2.begin();
+  for (uint8_t i = 0; i < ADC_NUM_MOS_ADCS; ++i) {
+    adcs[i].begin();
+  }
 
-  i2c_select_channel(META_SENSORS);
-  META_ADCS.init_all();
+  // INITIALISE ELECTROCHEM ADCS AND POWER SENSORS:
+  for (uint8_t i = MUX_NO_SENSOR_CHANNEL; i < MUX_CO2_SENSOR_CHANNEL; ++i) {
+    mux_select_channel(i);
+    power_sensor.begin();
+    for (uint8_t j = 0; j < ADC_NUM_ELECTROCHEM_ADCS; ++j) {
+      adcs[j].begin();
+    }
+  }
+
+  // INITIALISE CO2 ADCS AND POWER SENSORS:
+  mux_select_channel(MUX_CO2_SENSOR_CHANNEL);
+  power_sensor.begin();
+  for (uint8_t i = 0; i < ADC_NUM_CO2_ADCS; ++i) {
+    adcs[i].begin();
+  }
+
+  // INITIALISE PUMP POWER SENSORS:
+  mux_select_channel(MUX_PUMP_SENSOR_CHANNEL);
+  power_sensor.begin();
+
+  // INITIALISE META ADCS:
+  mux_select_channel(MUX_META_SENSOR_CHANNEL);
 }
-/*****************************************************************************
- * @brief  The main execution loop.
- ******************************************************************************/
+/******************************************************************************/
 void loop() {
-  DateTime iter_start_dt = rtc.now();
+  // TIMESTAMP THE START OF THE MAIN LOOP ITERATION FOR 0.5Hz CONTROL:
+  DateTime loop_iteration_start = rtc.now();
 
-  // GET CURRENT DAY AND PRINT INTO DATA FILE NAME, CONFIRMING THAT WE CAN OPEN
-  // THE DATA FILE ON THE SD CARD:
-  if (SD_INITIALISED) {
-    sprintf(FILENAME, "%04d%02d%02d.CSV", iter_start_dt.year(),
-            iter_start_dt.month(), iter_start_dt.day());
-    DATA_FILE = SD.open(FILENAME, FILE_WRITE);
-    if (! DATA_FILE) {
+  // SET UP SD CARD DATA FILE:
+  if (sd_initialised) {
+    sprintf(
+      sd_filename,
+      "%04d%02d%02d.CSV",
+      loop_iteration_start.year(),
+      loop_iteration_start.month(),
+      loop_iteration_start.day()
+    );
+
+    sd_data_file = SD.open(sd_filename, FILE_WRITE);
+
+    if (! sd_data_file) {
       Serial.println("ERROR: UNABLE TO OPEN SD CARD FILE");
     }
   }
+
+  // PRINT TIMESTAMP AS FIRST DATA FIELD:
+  Serial.print(loop_iteration_start.unixtime());
+  Serial.print(F(","));
+
+  if (sd_initialised) {
+    sd_data_file.print(loop_iteration_start.unixtime());
+    sd_data_file.print(",");
+  }
+
+  // SAMPLE DATA FROM ADCS AND POWER SENSORS, WRITING TO SERIAL / SD CARD:
   
-  // PRINT UNIX TIMESTAMP AS FIRST FIELD OF DATA:
-  uint32_t timestamp = iter_start_dt.unixtime();
-  Serial.print(timestamp);
-  Serial.print(F(","));
-  if (SD_INITIALISED) {
-    DATA_FILE.print(timestamp);
-    DATA_FILE.print(",");
-  }
- 
-  // SAMPLE DATA FROM POWER SENSORS & ADCS AND WRITE TO USB SERIAL/SD CARD:
-  sample_adc_group(MOS_SENSORS, MOS_ADCS, DATA_FILE, 1);
-  sample_adc_group(NO_SENSORS, ELECTROCHEM_ADCS, DATA_FILE, 1); 
-  sample_adc_group(CO_SENSORS, ELECTROCHEM_ADCS, DATA_FILE, 1);
-  sample_adc_group(OX_SENSORS, ELECTROCHEM_ADCS, DATA_FILE, 1);
-  sample_adc_group(NO2_SENSORS, ELECTROCHEM_ADCS, DATA_FILE, 1);
-  sample_adc_group(CO2_SENSORS, CO2_ADCS, DATA_FILE, 1);
- 
-  // SAMPLE PUMP POWER DATA AND WRITE TO USB SERIAL/SD CARD:
-  i2c_select_channel(PUMP_SENSORS);
-  i2c_read_channel_power(POWER_SENSOR, POWER_BUFFER);
-  serial_write_power_data(POWER_BUFFER, POWER_BUFFER_SIZE);
-  Serial.print(F(","));
-  if (SD_INITIALISED) {
-    sd_write_power_data(DATA_FILE, POWER_BUFFER, POWER_BUFFER_SIZE);
-    DATA_FILE.print(",");
-  }
-
-  // SAMPLE META SENSORS AND WRITE TO USB SERIAL/SD CARD:
-  i2c_select_channel(META_SENSORS);
-  META_ADCS.read_values_nd();
-  META_ADCS.write_u_values_to_serial();
-  if (SD_INITIALISED) {
-    META_ADCS.write_u_values_to_sd(DATA_FILE);
-  }
-
-  // WRITE NEW LINE TO USB SERIAL/SD CARD:
+  // WRITE LINE SEPARATOR TO SERIAL / SD CARD AND FLUSH SD CARD WRITE BUFFER:
   Serial.print(F("\r\n"));
-  if (SD_INITIALISED) {
-    DATA_FILE.print("\r\n");
+  
+  if (sd_initialised) {
+    sd_data_file.print("\r\n");
+    sd_data_file.close();
   }
 
-  // FLUSH THE SD CARD WRITE BUFFER:
-  if (SD_INITIALISED) {
-    DATA_FILE.close();
-  }
+  // WAIT FOR 2 SECONDS TO HAVE PASSED BEFORE LOOPING:
+  while ((rtc.now() - loop_iteration_start).totalseconds() < 2) {}
+}
+/******************************************************************************/
+void i2c_read_power_sensor(Adafruit_INA219 power_sensor, float *values) {
+  values[0] = ((float) power_sensor.getBusVoltage_V() * 1000) + 
+    power_sensor.getShuntVoltage_mV();
+  values[1] = power_sensor.getCurrent_mA();
+  values[2] = power_sensor.getPower_mW();
+}
 
-  while((rtc.now() - iter_start_dt).totalseconds() < 2) {}
+uint8_t mux_select_channel(uint8_t channel) {
+  Wire.beginTransmission(I2C_MUX_ADDRESS);
+  Wire.write(1 << channel);
+  return Wire.endTransmission();
 }
