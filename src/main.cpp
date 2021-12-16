@@ -49,7 +49,7 @@ Adafruit_ADS1115 adcs[4] = {
 Adafruit_INA219 power_sensor_1(I2C_POWER_SENSOR_1_ADDRESS);
 Adafruit_INA219 power_sensor_2(I2C_POWER_SENSOR_2_ADDRESS);
 File sd_data_file;
-char sd_filename[12] = {'\0'};
+char sd_filename[13] = {'\0'};
 RTC_DS1307 rtc;
 bool sd_initialised = false;
 /******************************************************************************/
