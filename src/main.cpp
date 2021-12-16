@@ -103,6 +103,9 @@ void setup() {
 
   // INITIALISE META ADCS:
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
+  for (uint8_t i = 0; i < ADC_NUM_META_ADCS; ++i) {
+    adcs[i].begin();
+  }
 }
 /******************************************************************************/
 void loop() {
