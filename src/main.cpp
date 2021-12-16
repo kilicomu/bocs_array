@@ -12,7 +12,7 @@
 #include <SPI.h>
 #include <Wire.h>
 /******************************************************************************/
-#define BAUD_RATE 115200
+#define BAUD_RATE 9600
 
 #define I2C_MUX_ADDRESS            0x70
 #define I2C_ADC_1_ADDRESS          0x48
