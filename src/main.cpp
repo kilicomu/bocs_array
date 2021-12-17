@@ -31,10 +31,10 @@
 #define MUX_PUMP_SENSOR_CHANNEL    0x06
 #define MUX_META_SENSOR_CHANNEL    0x07
 
-#define ADC_NUM_MOS_ADCS           0x04
-#define ADC_NUM_ELECTROCHEM_ADCS   0x03
-#define ADC_NUM_CO2_ADCS           0x03
-#define ADC_NUM_META_ADCS          0x02
+#define ADC_NUM_MOS_ADCS           4
+#define ADC_NUM_ELECTROCHEM_ADCS   3
+#define ADC_NUM_CO2_ADCS           3
+#define ADC_NUM_META_ADCS          2
 /******************************************************************************/
 void    i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count);
 void    i2c_read_power_sensor(Adafruit_INA219 power_sensor);
