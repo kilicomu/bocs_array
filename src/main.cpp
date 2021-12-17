@@ -37,7 +37,7 @@
 #define ADC_NUM_META_ADCS          2
 /******************************************************************************/
 void    i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count);
-void    i2c_read_power_sensor(Adafruit_INA219 power_sensor);
+void    i2c_read_power_sensor(Adafruit_INA219& power_sensor);
 uint8_t mux_select_channel(uint8_t channel);
 /******************************************************************************/
 Adafruit_ADS1115 adcs[4] = {
@@ -86,7 +86,7 @@ void setup() {
     mux_select_channel(i);
     power_sensor_1.begin();
     for (int8_t j = 0; j < ADC_NUM_ELECTROCHEM_ADCS; ++j) {
-      adcs[j].begin();
+      adcs[j].begin(I2C_ADC_1_ADDRESS + i);
     }
   }
 
@@ -94,7 +94,7 @@ void setup() {
   mux_select_channel(MUX_CO2_SENSOR_CHANNEL);
   power_sensor_1.begin();
   for (int8_t i = 0; i < ADC_NUM_CO2_ADCS; ++i) {
-    adcs[i].begin();
+    adcs[i].begin(I2C_ADC_1_ADDRESS + i);
   }
 
   // INITIALISE PUMP POWER SENSORS:
@@ -104,7 +104,7 @@ void setup() {
   // INITIALISE META ADCS:
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
   for (int8_t i = 0; i < ADC_NUM_META_ADCS; ++i) {
-    adcs[i].begin();
+    adcs[i].begin(I2C_ADC_1_ADDRESS + i);
   }
 }
 /******************************************************************************/
@@ -230,7 +230,7 @@ void i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count) {
   }
 }
 
-void i2c_read_power_sensor(Adafruit_INA219 power_sensor) {
+void i2c_read_power_sensor(Adafruit_INA219& power_sensor) {
   float values[3] = {
     ((float) power_sensor.getBusVoltage_V() * 1000) + power_sensor.getShuntVoltage_mV(),
     power_sensor.getCurrent_mA(),
