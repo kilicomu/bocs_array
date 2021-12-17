@@ -5,7 +5,7 @@
  * @brief   Main sensor reading loop for BOCS instrument.
  ******************************************************************************/
 #include <Arduino.h>
-#include <Adafruit_ADS1015.h>
+#include <Adafruit_ADS1X15.h>
 #include <Adafruit_INA219.h>
 #include <RTClib.h>
 #include <SD.h>
@@ -41,10 +41,10 @@ void    i2c_read_power_sensor(Adafruit_INA219 power_sensor);
 uint8_t mux_select_channel(uint8_t channel);
 /******************************************************************************/
 Adafruit_ADS1115 adcs[4] = {
-  Adafruit_ADS1115(I2C_ADC_1_ADDRESS),
-  Adafruit_ADS1115(I2C_ADC_2_ADDRESS),
-  Adafruit_ADS1115(I2C_ADC_3_ADDRESS),
-  Adafruit_ADS1115(I2C_ADC_4_ADDRESS)
+  Adafruit_ADS1115(),
+  Adafruit_ADS1115(),
+  Adafruit_ADS1115(),
+  Adafruit_ADS1115()
 };
 Adafruit_INA219 power_sensor_1(I2C_POWER_SENSOR_1_ADDRESS);
 Adafruit_INA219 power_sensor_2(I2C_POWER_SENSOR_2_ADDRESS);
@@ -78,7 +78,7 @@ void setup() {
   power_sensor_1.begin();
   power_sensor_2.begin();
   for (int8_t i = 0; i < ADC_NUM_MOS_ADCS; ++i) {
-    adcs[i].begin();
+    adcs[i].begin(I2C_ADC_1_ADDRESS + i);
   }
 
   // INITIALISE ELECTROCHEM ADCS AND POWER SENSORS:
@@ -167,8 +167,8 @@ void loop() {
   //  i2c_read_channel_adcs, AND DON'T WANT A TRAILING COMMA)
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
 
-  uint16_t value_1 = adcs[0].readADC_SingleEnded(0);
-  uint16_t value_2 = adcs[0].readADC_SingleEnded(1);
+  int16_t value_1 = adcs[0].readADC_SingleEnded(0);
+  int16_t value_2 = adcs[0].readADC_SingleEnded(1);
 
   Serial.print(value_1);
   Serial.print(F(","));
