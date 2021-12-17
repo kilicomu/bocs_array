@@ -22,6 +22,7 @@
 #define I2C_POWER_SENSOR_1_ADDRESS 0x40
 #define I2C_POWER_SENSOR_2_ADDRESS 0x41
 
+#define MUX_MOS_SENSOR_CHANNEL     0x00
 #define MUX_NO_SENSOR_CHANNEL      0x01
 #define MUX_CO_SENSOR_CHANNEL      0x02
 #define MUX_OX_SENSOR_CHANNEL      0x03
@@ -76,15 +77,15 @@ void setup() {
   mux_select_channel(MUX_MOS_SENSOR_CHANNEL);
   power_sensor_1.begin();
   power_sensor_2.begin();
-  for (uint8_t i = 0; i < ADC_NUM_MOS_ADCS; ++i) {
+  for (int8_t i = 0; i < ADC_NUM_MOS_ADCS; ++i) {
     adcs[i].begin();
   }
 
   // INITIALISE ELECTROCHEM ADCS AND POWER SENSORS:
-  for (uint8_t i = MUX_NO_SENSOR_CHANNEL; i < MUX_CO2_SENSOR_CHANNEL; ++i) {
+  for (int8_t i = MUX_NO_SENSOR_CHANNEL; i < MUX_CO2_SENSOR_CHANNEL; ++i) {
     mux_select_channel(i);
     power_sensor_1.begin();
-    for (uint8_t j = 0; j < ADC_NUM_ELECTROCHEM_ADCS; ++j) {
+    for (int8_t j = 0; j < ADC_NUM_ELECTROCHEM_ADCS; ++j) {
       adcs[j].begin();
     }
   }
@@ -92,7 +93,7 @@ void setup() {
   // INITIALISE CO2 ADCS AND POWER SENSORS:
   mux_select_channel(MUX_CO2_SENSOR_CHANNEL);
   power_sensor_1.begin();
-  for (uint8_t i = 0; i < ADC_NUM_CO2_ADCS; ++i) {
+  for (int8_t i = 0; i < ADC_NUM_CO2_ADCS; ++i) {
     adcs[i].begin();
   }
 
@@ -102,7 +103,7 @@ void setup() {
 
   // INITIALISE META ADCS:
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
-  for (uint8_t i = 0; i < ADC_NUM_META_ADCS; ++i) {
+  for (int8_t i = 0; i < ADC_NUM_META_ADCS; ++i) {
     adcs[i].begin();
   }
 }
@@ -144,7 +145,7 @@ void loop() {
   i2c_read_channel_adcs(adcs, ADC_NUM_MOS_ADCS);
 
   // SAMPLE DATA FROM ELECTROCHEM ADCS AND POWER SENSORS:
-  for (uint8_t i = MUX_NO_SENSOR_CHANNEL; i < MUX_CO2_SENSOR_CHANNEL; ++i) {
+  for (int8_t i = MUX_NO_SENSOR_CHANNEL; i < MUX_CO2_SENSOR_CHANNEL; ++i) {
     mux_select_channel(i);
     i2c_read_power_sensor(power_sensor_1);
     i2c_read_channel_adcs(adcs, ADC_NUM_ELECTROCHEM_ADCS);
@@ -160,6 +161,10 @@ void loop() {
   i2c_read_power_sensor(power_sensor_1);
 
   // SAMPLE DATA FROM META ADCS:
+  //
+  // (THIS IS DONE DIFFERENTLY FROM ABOVE - WE NEED SINGLE ENDED READS,
+  //  AS OPPOSED TO THE DIFFERENTIAL READS ENCAPSULATED IN
+  //  i2c_read_channel_adcs, AND DON'T WANT A TRAILING COMMA)
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
 
   uint16_t value_1 = adcs[0].readADC_SingleEnded(0);
@@ -205,7 +210,7 @@ void loop() {
 }
 /******************************************************************************/
 void i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count) {
-  for (uint8_t i = 0; i < adc_count; ++i) {
+  for (int8_t i = 0; i < adc_count; ++i) {
     int16_t value_1 = adcs[i].readADC_Differential_0_1();
     int16_t value_2 = adcs[i].readADC_Differential_2_3();
 
@@ -232,7 +237,7 @@ void i2c_read_power_sensor(Adafruit_INA219 power_sensor) {
     power_sensor.getPower_mW()
   };
 
-  for (uint8_t i = 0; i < 3; ++i) {
+  for (int8_t i = 0; i < 3; ++i) {
     Serial.print(values[i]);
     Serial.print(F(","));
 
