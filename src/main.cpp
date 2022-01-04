@@ -36,8 +36,8 @@
 #define ADC_NUM_CO2_ADCS           3
 #define ADC_NUM_META_ADCS          2
 /******************************************************************************/
-void    i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count);
-void    i2c_read_power_sensor(Adafruit_INA219& power_sensor);
+void    i2c_log_channel_adcs_differential(Adafruit_ADS1115 *adcs, int adc_count);
+void    i2c_log_power_sensor(Adafruit_INA219& power_sensor);
 uint8_t mux_select_channel(uint8_t channel);
 /******************************************************************************/
 Adafruit_ADS1115 adcs[4] = {
@@ -140,31 +140,31 @@ void loop() {
 
   // SAMPLE DATA FROM MOS ADCS AND POWER SENSORS:
   mux_select_channel(MUX_MOS_SENSOR_CHANNEL);
-  i2c_read_power_sensor(power_sensor_1);
-  i2c_read_power_sensor(power_sensor_2);
-  i2c_read_channel_adcs(adcs, ADC_NUM_MOS_ADCS);
+  i2c_log_power_sensor(power_sensor_1);
+  i2c_log_power_sensor(power_sensor_2);
+  i2c_log_channel_adcs_differential(adcs, ADC_NUM_MOS_ADCS);
 
   // SAMPLE DATA FROM ELECTROCHEM ADCS AND POWER SENSORS:
   for (int8_t i = MUX_NO_SENSOR_CHANNEL; i < MUX_CO2_SENSOR_CHANNEL; ++i) {
     mux_select_channel(i);
-    i2c_read_power_sensor(power_sensor_1);
-    i2c_read_channel_adcs(adcs, ADC_NUM_ELECTROCHEM_ADCS);
+    i2c_log_power_sensor(power_sensor_1);
+    i2c_log_channel_adcs_differential(adcs, ADC_NUM_ELECTROCHEM_ADCS);
   }
 
   // SAMPLE DATA FROM CO2 ADCS AND POWER SENSORS:
   mux_select_channel(MUX_CO2_SENSOR_CHANNEL);
-  i2c_read_power_sensor(power_sensor_1);
-  i2c_read_channel_adcs(adcs, ADC_NUM_CO2_ADCS);
+  i2c_log_power_sensor(power_sensor_1);
+  i2c_log_channel_adcs_differential(adcs, ADC_NUM_CO2_ADCS);
 
   // SAMPLE DATA FROM PUMP POWER SENSORS:
   mux_select_channel(MUX_PUMP_SENSOR_CHANNEL);
-  i2c_read_power_sensor(power_sensor_1);
+  i2c_log_power_sensor(power_sensor_1);
 
   // SAMPLE DATA FROM META ADCS:
   //
   // (THIS IS DONE DIFFERENTLY FROM ABOVE - WE NEED SINGLE ENDED READS,
   //  AS OPPOSED TO THE DIFFERENTIAL READS ENCAPSULATED IN
-  //  i2c_read_channel_adcs, AND DON'T WANT A TRAILING COMMA)
+  //  i2c_log_channel_adcs_differential, AND DON'T WANT A TRAILING COMMA)
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
 
   int16_t value_1 = adcs[0].readADC_SingleEnded(0);
@@ -209,7 +209,7 @@ void loop() {
   while ((rtc.now() - loop_iteration_start).totalseconds() < 2) {}
 }
 /******************************************************************************/
-void i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count) {
+void i2c_log_channel_adcs_differential(Adafruit_ADS1115 *adcs, int adc_count) {
   for (int8_t i = 0; i < adc_count; ++i) {
     int16_t value_1 = adcs[i].readADC_Differential_0_1();
     int16_t value_2 = adcs[i].readADC_Differential_2_3();
@@ -230,7 +230,7 @@ void i2c_read_channel_adcs(Adafruit_ADS1115 *adcs, int adc_count) {
   }
 }
 
-void i2c_read_power_sensor(Adafruit_INA219& power_sensor) {
+void i2c_log_power_sensor(Adafruit_INA219& power_sensor) {
   float values[3] = {
     ((float) power_sensor.getBusVoltage_V() * 1000) + power_sensor.getShuntVoltage_mV(),
     power_sensor.getCurrent_mA(),
