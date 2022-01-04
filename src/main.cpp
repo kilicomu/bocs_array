@@ -37,7 +37,10 @@
 #define ADC_NUM_META_ADCS          2
 /******************************************************************************/
 void    i2c_log_channel_adcs_differential(Adafruit_ADS1115 *adcs, int adc_count);
+void    i2c_log_channel_adcs_single_ended(Adafruit_ADS1115 *adcs, int adc_count);
 void    i2c_log_power_sensor(Adafruit_INA219& power_sensor);
+void    log_single_value(int16_t value, bool trailing_comma);
+void    log_single_value(float value, bool trailing_comma);
 uint8_t mux_select_channel(uint8_t channel);
 /******************************************************************************/
 Adafruit_ADS1115 adcs[4] = {
@@ -161,41 +164,8 @@ void loop() {
   i2c_log_power_sensor(power_sensor_1);
 
   // SAMPLE DATA FROM META ADCS:
-  //
-  // (THIS IS DONE DIFFERENTLY FROM ABOVE - WE NEED SINGLE ENDED READS,
-  //  AS OPPOSED TO THE DIFFERENTIAL READS ENCAPSULATED IN
-  //  i2c_log_channel_adcs_differential, AND DON'T WANT A TRAILING COMMA)
   mux_select_channel(MUX_META_SENSOR_CHANNEL);
-
-  int16_t value_1 = adcs[0].readADC_SingleEnded(0);
-  int16_t value_2 = adcs[0].readADC_SingleEnded(1);
-
-  Serial.print(value_1);
-  Serial.print(F(","));
-
-  Serial.print(value_2);
-  Serial.print(F(","));
-
-  if (sd_initialised) {
-    sd_data_file.print(value_1);
-    sd_data_file.print(F(","));
-
-    sd_data_file.print(value_2);
-    sd_data_file.print(F(","));
-  }
-
-  value_1 = adcs[1].readADC_SingleEnded(0);
-  value_2 = adcs[1].readADC_SingleEnded(1);
-
-  Serial.print(value_1);
-  Serial.print(F(","));
-  Serial.print(value_2);
-
-  if (sd_initialised) {
-    sd_data_file.print(value_1);
-    sd_data_file.print(F(","));
-    sd_data_file.print(value_2);
-  }
+  i2c_log_channel_adcs_single_ended(adcs, ADC_NUM_META_ADCS);
   
   // WRITE LINE SEPARATOR TO SERIAL / SD CARD AND FLUSH SD CARD WRITE BUFFER:
   Serial.print(F("\r\n"));
@@ -211,40 +181,31 @@ void loop() {
 /******************************************************************************/
 void i2c_log_channel_adcs_differential(Adafruit_ADS1115 *adcs, int adc_count) {
   for (int8_t i = 0; i < adc_count; ++i) {
-    int16_t value_1 = adcs[i].readADC_Differential_0_1();
-    int16_t value_2 = adcs[i].readADC_Differential_2_3();
+    log_single_value(adcs[i].readADC_Differential_0_1(), true);
+    log_single_value(adcs[i].readADC_Differential_2_3(), true);
+  }
+}
 
-    Serial.print(value_1);
-    Serial.print(F(","));
-
-    Serial.print(value_2);
-    Serial.print(F(","));
-
-    if (sd_initialised) {
-      sd_data_file.print(value_1);
-      sd_data_file.print(F(","));
-
-      sd_data_file.print(value_2);
-      sd_data_file.print(F(","));
+void i2c_log_channel_adcs_single_ended(Adafruit_ADS1115 *adcs, int adc_count) {
+  for (int8_t i = 0; i < adc_count; ++i) {
+    log_single_value(adcs[i].readADC_SingleEnded(0), true);
+    if (i == adc_count - 1) {
+      log_single_value(adcs[i].readADC_SingleEnded(1), false);
+    } else {
+      log_single_value(adcs[i].readADC_SingleEnded(1), true);
     }
   }
 }
 
 void i2c_log_power_sensor(Adafruit_INA219& power_sensor) {
-  float values[3] = {
+  float power_values[3] = {
     ((float) power_sensor.getBusVoltage_V() * 1000) + power_sensor.getShuntVoltage_mV(),
     power_sensor.getCurrent_mA(),
     power_sensor.getPower_mW()
   };
 
   for (int8_t i = 0; i < 3; ++i) {
-    Serial.print(values[i]);
-    Serial.print(F(","));
-
-    if (sd_initialised) {
-      sd_data_file.print(values[i]);
-      sd_data_file.print(F(","));
-    }
+    log_single_value(power_values[i], true);
   }
 }
 
@@ -252,4 +213,24 @@ uint8_t mux_select_channel(uint8_t channel) {
   Wire.beginTransmission(I2C_MUX_ADDRESS);
   Wire.write(1 << channel);
   return Wire.endTransmission();
+}
+
+void log_single_value(int16_t value, bool trailing_comma) {
+  Serial.print(value);
+  if (trailing_comma) {Serial.print(F(","));}
+
+  if (sd_initialised) {
+    sd_data_file.print(value);
+    if (trailing_comma) {sd_data_file.print(F(","));}
+  }
+}
+
+void log_single_value(float value, bool trailing_comma) {
+  Serial.print(value);
+  if (trailing_comma) {Serial.print(F(","));}
+
+  if (sd_initialised) {
+    sd_data_file.print(value);
+    if (trailing_comma) {sd_data_file.print(F(","));}
+  }
 }
