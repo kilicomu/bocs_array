@@ -6,7 +6,7 @@ This repository contains a simple program for getting and logging sensor values 
 For more information about the BOCS instrument, please see the BOCS project website: **TODO**
 
 ## Setup
-This program supports build and installation via either the Arduino IDE or PlatformIO. To set up the Arduino IDE, please see ['Getting Started with Arduino products'](https://www.arduino.cc/en/Guide). To set up PlatformIO, please see the [PlatformIO installation guides](https://platformio.org/install/).
+This program supports build and installation via either the Arduino IDE or PlatformIO. To set up the Arduino IDE, please see [Getting Started with Arduino products](https://www.arduino.cc/en/Guide). To set up PlatformIO, please see the [PlatformIO installation guides](https://platformio.org/install/).
 
 This program is built with a few libraries, specifically:
 
@@ -16,14 +16,14 @@ This program is built with a few libraries, specifically:
 
 When building the project with PlatformIO, the installation of these libraries will happen automatically! With the Arduino IDE, these libraries will need to be installed by you - you can find out how to do this from the [Arduino documentation](https://docs.arduino.cc/learn/starting-guide/software-libraries).
 
-**Please note:** This program assumes that you have already set the time on the DS1307 real time clock that is attached to the data logging shield. If you haven't, please do so before installing this program to the Arduino - you can find an example of how to do this [here](https://learn.adafruit.com/ds1307-real-time-clock-breakout-board-kit/understanding-the-code).
+**Please note:** This program assumes that you have already set the time on the DS1307 real time clock that is attached to the data logging shield. If you haven't, please do so before installing this program to your Arduino - you can find an example of how to do this [here](https://learn.adafruit.com/ds1307-real-time-clock-breakout-board-kit/understanding-the-code).
 
 ## Installation
 
 ### Arduino IDE
 1. Clone a copy of this repository or download it as a ZIP from the Releases page and extract it to your filesystem
 2. Open the `src/bocs_array.ino` file in the Arduino IDE
-3. Ensure that you have installed the required libraries as described in the `Setup` section of this README
+3. Ensure that you have installed the required libraries as described in the [Setup](#setup) section of this README
 4. With your Arduino Uno attached to a USB port on your computer, follow the generic instructions for uploading an Arduino sketch to a device, available [here](https://docs.arduino.cc/software/ide-v1/tutorials/arduino-ide-v1-basics#uploading)
 
 ### PlatformIO IDE
@@ -39,4 +39,4 @@ When building the project with PlatformIO, the installation of these libraries w
 4. With the Arduino Uno attached to a USB port on your computer, run the `platformio run --target upload` command to upload the `bocs_array` program to the Arduino
 
 ## Contact
-Please report any issues / suggestions to Pete Edwards <pete.edwards@york.ac.uk> in the first instance, as well as opening a repository issue.
+Please report any issues / suggestions to [Pete Edwards](mailto:pete.edwards@york.ac.uk) in the first instance, as well as opening a repository issue.
