@@ -13,6 +13,7 @@ This program is built with a few libraries, specifically:
 * [Adafruit_ADS1X15](https://github.com/adafruit/Adafruit_ADS1X15) - tested with version 2.3.0
 * [Adafruit_INA219](https://github.com/adafruit/Adafruit_INA219) - tested with version 1.1.1
 * [RTClib](https://github.com/adafruit/RTClib) - tested with version 1.1.1
+* [SD](https://www.arduino.cc/reference/en/libraries/sd/) - tested with version 1.2.4
 
 When building the project with PlatformIO, the installation of these libraries will happen automatically! With the Arduino IDE, these libraries will need to be installed by you - you can find out how to do this from the [Arduino documentation](https://docs.arduino.cc/learn/starting-guide/software-libraries).
 
@@ -28,7 +29,7 @@ When building the project with PlatformIO, the installation of these libraries w
 
 ### PlatformIO IDE
 1. Clone a copy of this repository or download it as a ZIP from the Releases page and extract it to your filesystem
-2. Open the `bocs_array` directory with 'Open Project' from inside PlatformIO IDE
+2. Open the top-level `bocs_array` directory with 'Open Project' from inside PlatformIO IDE
 3. Under 'uno'->'General' in the PlatformIO 'Project Tasks' pane, select 'Build' to set up the project and build the program
 4. With your Arduino Uno attached to a USB port on your computer, under 'uno'->'General' in the PlatformIO 'Project Tasks' pane, select 'Upload' to upload the `bocs_array` program to the Arduino
 
