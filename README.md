@@ -35,7 +35,7 @@ When building the project with PlatformIO, the installation of these libraries w
 
 ### PlatformIO CLI
 1. Clone a copy of this repository or download it as a ZIP from the Releases page and extract it to your filesystem
-2. In a terminal, change working directory to `bocs_array`
+2. In a terminal, change working directory to the top-level `bocs_array` directory
 3. Run the `platformio run` command to complete necessary housekeeping tasks and build the `bocs_array` program
 4. With the Arduino Uno attached to a USB port on your computer, run the `platformio run --target upload` command to upload the `bocs_array` program to the Arduino
 
